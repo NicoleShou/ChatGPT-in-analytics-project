@@ -1,0 +1,37 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+# specify the URL to scrape
+url = "https://www.imdb.com/title/tt3581920/reviews/?ref_=tt_ov_rt"
+
+# send a GET request to the URL
+response = requests.get(url)
+
+# create a BeautifulSoup object to parse the HTML content
+soup = BeautifulSoup(response.content, "html.parser")
+
+# find all the review containers on the page
+reviews = soup.find_all("div", class_="lister-item-content")
+
+# create a list to store the extracted data
+data = []
+
+# loop through each review and extract the desired information
+for review in reviews:
+    rating = '"' + review.find("span", class_="rating-other-user-rating").text.strip() + '"'
+    title = review.find("a", class_="title").text.strip()
+    user = review.find("span", class_="display-name-link").text.strip()
+    date = review.find("span", class_="review-date").text.strip()
+    content = review.find("div", class_="text").text.strip().replace("\n", " ")
+    
+    # append the extracted data to the list
+    data.append([rating, date, title, user, content])
+
+# write the extracted data to a csv file
+with open("imdb_reviews.csv", "w", encoding="utf-8", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["Rating", "Review Time", "Review Title", "User", "Review Content"])
+    writer.writerows(data)
+    
+print("Data extraction complete. Check imdb_reviews.csv file for the results.")

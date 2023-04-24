@@ -1,0 +1,64 @@
+import re
+import string
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from gensim import corpora, models
+
+# Load stop words and add custom ones
+stop_words = set(stopwords.words('english'))
+custom_stopwords = {'like', 'oh', 'right', "'m", "'s", 'yeah', 'okay', 'also', 'thank', "n't", 'yup', 'sure'}
+stop_words = stop_words.union(custom_stopwords)
+
+# Load zoom transcript
+with open('zoom_transcript.txt', 'r') as file:
+    transcript = file.read()
+
+# Clean up transcript
+transcript = re.sub('\[.*?\]', '', transcript)  # Remove timestamps
+transcript = transcript.translate(str.maketrans('', '', string.punctuation))  # Remove punctuations
+transcript = transcript.lower()  # Convert to lowercase
+
+# Tokenize transcript
+tokens = word_tokenize(transcript)
+
+# Remove stop words
+filtered_tokens = [token for token in tokens if token not in stop_words]
+
+# Create bag of words
+dictionary = corpora.Dictionary([filtered_tokens])
+corpus = [dictionary.doc2bow([token]) for token in filtered_tokens]
+
+# Train LDA model
+lda_model = models.LdaModel(corpus, num_topics=5, id2word=dictionary)
+
+# Extract dominant topic and overall weight
+dominant_topic = None
+dominant_weight = 0
+for topic, weight in lda_model.show_topics(formatted=False):
+    topic_weight = sum([w for _, w in weight])
+    if topic_weight > dominant_weight:
+        dominant_topic = topic
+        dominant_weight = topic_weight
+
+# Print dominant topic and overall weight
+print(f"Overall Dominant Topic: Topic {dominant_topic} with a weight of {dominant_weight:.2f}\n")
+
+# Print topics and weights
+topics_df = pd.DataFrame(columns=['Topic', 'Weight'])
+for i, (topic, weight) in enumerate(lda_model.show_topics(formatted=False)):
+    topic_weight = sum([w for _, w in weight])
+    topics_df.loc[i] = [f"Topic {topic}", topic_weight]
+    print(f"Topic {topic}: {topic_weight:.2f}")
+    print(" ".join([w[0] for w in weight[:10]]))
+    print()
+
+# Create bar chart
+topics_df.set_index('Topic', inplace=True)
+topics_df.plot(kind='bar', legend=False)
+plt.title('Topic Distribution')
+plt.xlabel('Topic')
+plt.ylabel('Weight')
+plt.show()

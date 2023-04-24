@@ -1,0 +1,36 @@
+import re
+import nltk
+from nltk.corpus import stopwords
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from datetime import datetime
+
+# Define the stopwords
+stopwords = set(stopwords.words('english'))
+stopwords.update(['like', 'oh', 'right', "'m","'s",'yeah','okay','also','thank',"n't",'yup','sure', '.', ',', '?', '!', ':', ';', '(', ')', '[', ']', '{', '}', '"', "'", '``', "''"])
+
+# Read the local txt file
+with open('path/to/your/file.txt', 'r') as file:
+    data = file.read()
+
+# Tokenize the text and remove stopwords
+tokens = nltk.word_tokenize(data.lower())
+filtered_tokens = [token for token in tokens if token not in stopwords]
+
+# Count the frequency of each word
+freq_dist = nltk.FreqDist(filtered_tokens)
+
+# Print the top 20 most frequent words
+print(f"Top 20 most frequent words: {freq_dist.most_common(20)}")
+
+# Generate the word cloud image
+wordcloud = WordCloud(width=800, height=800, background_color='white', stopwords=stopwords).generate_from_frequencies(freq_dist)
+
+# Plot the word cloud image
+plt.figure(figsize=(8,8))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+
+# Add timestamp
+print("Script executed on:", datetime.now())

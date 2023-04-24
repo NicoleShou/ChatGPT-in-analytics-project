@@ -1,0 +1,74 @@
+--Create the Products table
+CREATE TABLE Products (
+  product_id INTEGER PRIMARY KEY,
+  product_name VARCHAR2(255),
+  product_type VARCHAR2(255),
+  price NUMBER(10,2),
+  quantity INTEGER,
+  date_added DATE
+);
+
+--Create the Ingredients table
+CREATE TABLE Ingredients (
+  ingredient_id INTEGER PRIMARY KEY,
+  ingredient_name VARCHAR2(255),
+  supplier_id INTEGER,
+  price_per_unit NUMBER(10,2),
+  FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id)
+);
+
+--Create the Suppliers table
+CREATE TABLE Suppliers (
+  supplier_id INTEGER PRIMARY KEY,
+  supplier_name VARCHAR2(255),
+  supplier_address VARCHAR2(255),
+  supplier_phone VARCHAR2(20)
+);
+
+--Create the Customers table
+CREATE TABLE Customers (
+  customer_id INTEGER PRIMARY KEY,
+  customer_name VARCHAR2(255),
+  customer_address VARCHAR2(255),
+  customer_phone VARCHAR2(20)
+);
+
+--Create the Sales table
+CREATE TABLE Sales (
+  sale_id INTEGER PRIMARY KEY,
+  customer_id INTEGER,
+  product_id INTEGER,
+  quantity INTEGER,
+  sale_date DATE,
+  FOREIGN KEY (customer_id) REFERENCES Customers(customer_id),
+  FOREIGN KEY (product_id) REFERENCES Products(product_id)
+);
+
+--Create the Orders table
+CREATE TABLE Orders (
+  order_id INTEGER PRIMARY KEY,
+  supplier_id INTEGER,
+  ingredient_id INTEGER,
+  quantity INTEGER,
+  order_date DATE,
+  FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id),
+  FOREIGN KEY (ingredient_id) REFERENCES Ingredients(ingredient_id)
+);
+
+--Create the Inventory table
+CREATE TABLE Inventory (
+  product_id INTEGER,
+  ingredient_id INTEGER,
+  quantity INTEGER,
+  FOREIGN KEY (product_id) REFERENCES Products(product_id),
+  FOREIGN KEY (ingredient_id) REFERENCES Ingredients(ingredient_id)
+);
+
+--Create the Recipes table
+CREATE TABLE Recipes (
+  product_id INTEGER,
+  ingredient_id INTEGER,
+  quantity NUMBER(10,2),
+  FOREIGN KEY (product_id) REFERENCES Products(product_id),
+  FOREIGN KEY (ingredient_id) REFERENCES Ingredients(ingredient_id)
+);
